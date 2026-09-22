@@ -77,6 +77,7 @@ extension EditorViewController: EditorViewDelegate {
     /// 编辑状态改变已经结束
     public func editorView(didEndEditing editorView: EditorView) {
         resetButton.isEnabled = isReset
+        if isLegacyCropLayout { checkFinishButtonState() }
     }
     /// 即将进入编辑状态
     public func editorView(editWillAppear editorView: EditorView) {
@@ -85,6 +86,7 @@ extension EditorViewController: EditorViewDelegate {
     /// 已经进入编辑状态
     public func editorView(editDidAppear editorView: EditorView) {
         resetButton.isEnabled = isReset
+        if isLegacyCropLayout { checkFinishButtonState() }
     }
     /// 即将结束编辑状态
     public func editorView(editWillDisappear editorView: EditorView) {

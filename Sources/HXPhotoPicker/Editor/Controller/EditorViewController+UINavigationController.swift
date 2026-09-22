@@ -53,6 +53,7 @@ extension EditorViewController {
     }
     
     func transitionHide() {
+        legacyRatioButton?.alpha = 0
         cancelButton.alpha = 0
         toolsView.alpha = 0
         finishButton.alpha = 0

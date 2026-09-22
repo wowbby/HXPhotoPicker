@@ -570,6 +570,10 @@ extension EditorViewController: EditorToolsViewDelegate {
     }
     
     func showCropSizeToolsView() {
+        if isLegacyCropLayout {
+            showLegacyCropControls()
+            return
+        }
         if !rotateScaleView.isHidden && rotateScaleView.alpha == 1 {
             return
         }
@@ -651,6 +655,7 @@ extension EditorViewController: EditorToolsViewDelegate {
     }
     
     func showScaleSwitchView(_ isRatioClick: Bool = false) {
+        if isLegacyCropLayout { return }
         if config.cropSize.aspectRatios.isEmpty {
             return
         }
@@ -674,6 +679,7 @@ extension EditorViewController: EditorToolsViewDelegate {
     }
     
     func hideScaleSwitchView(_ isRatioClick: Bool = false) {
+        if isLegacyCropLayout { return }
         if config.cropSize.aspectRatios.isEmpty {
             return
         }

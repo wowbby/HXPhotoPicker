@@ -69,6 +69,7 @@ open class EditorViewController: HXBaseViewController {
     var cancelButton: UIButton!
     var finishButton: UIButton!
     var resetButton: UIButton!
+    var legacyRatioButton: UIButton?
     var leftRotateButton: UIButton!
     var rightRotateButton: UIButton!
     var mirrorHorizontallyButton: UIButton!
@@ -382,6 +383,15 @@ open class EditorViewController: HXBaseViewController {
             guard let self = self else {
                 return .zero
             }
+            if self.isLegacyCropLayout {
+                let safeArea = self.view.safeAreaInsets
+                return .init(
+                    top: safeArea.top + 10,
+                    left: safeArea.left + 15,
+                    bottom: safeArea.bottom + 110,
+                    right: safeArea.right + 15
+                )
+            }
             if UIDevice.isPortrait {
                 let top: CGFloat
                 let bottom: CGFloat
@@ -503,6 +513,9 @@ open class EditorViewController: HXBaseViewController {
         view.addSubview(resetButton)
         view.addSubview(cancelButton)
         view.addSubview(finishButton)
+        if isLegacyCropLayout {
+            configureLegacyCropControls()
+        }
         
         if #available(iOS 13.0, *) {
             view.addSubview(drawUndoBtn)
@@ -783,6 +796,9 @@ open class EditorViewController: HXBaseViewController {
                 self.musicView.scrollToSelected()
             }
             orientationDidChange = false
+        }
+        if isLegacyCropLayout {
+            layoutLegacyCropControls()
         }
     }
     

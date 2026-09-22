@@ -26,6 +26,19 @@ class EditorMaskView: UIView {
     
     var gridlinesView: UIView!
     var gridGraylinesView: UIView!
+
+    /// The former basic crop editor kept its thirds grid and four corners visible.
+    /// Set only on the frame overlay of the opt-in legacy image editor.
+    var usesLegacyCropStyle = false {
+        didSet {
+            guard type == .frame else { return }
+            gridlinesLayer.lineWidth = usesLegacyCropStyle ? 1 : 0.5
+            frameLayer.lineWidth = usesLegacyCropStyle ? 1 : 1.2
+            dotsLayer.lineWidth = usesLegacyCropStyle ? 2.5 : 3.5
+            showGridlinesLayer(usesLegacyCropStyle, animated: false)
+            updateLayers(layersRect, false)
+        }
+    }
     
     var imageSize: CGSize = .zero {
         didSet {
@@ -226,6 +239,7 @@ class EditorMaskView: UIView {
         sizeLb.adjustsFontSizeToFitWidth = true
         
         gridlinesView = UIView()
+        gridlinesView.accessibilityIdentifier = "hx.editor.cropGrid"
         gridlinesView.alpha = 0
         gridlinesView.isUserInteractionEnabled = false
         gridlinesView.layer.addSublayer(gridlinesLayer)
@@ -669,6 +683,7 @@ extension EditorMaskView {
     }
     
     func showGridlinesLayer(_ isShow: Bool, animated: Bool) {
+        let isShow = isShow || usesLegacyCropStyle
         if isRoundCrop {
             if !gridlinesLayer.isHidden {
                 CATransaction.begin()
@@ -695,6 +710,7 @@ extension EditorMaskView {
     }
     
     func showGridGraylinesView(animated: Bool) {
+        guard !usesLegacyCropStyle else { return }
         if gridGraylinesView.alpha == 1 {
             return
         }
@@ -725,7 +741,7 @@ extension EditorMaskView {
     func getDotsPath(
         _ rect: CGRect
     ) -> UIBezierPath {
-        let lineWidth: CGFloat = 20
+        let lineWidth: CGFloat = usesLegacyCropStyle ? 25 : 20
         let path = UIBezierPath.init()
         let leftTopStartPoint = CGPoint(x: rect.minX + lineWidth, y: rect.minY)
         let leftTopMidPoint = CGPoint(x: rect.minX, y: rect.minY)
@@ -754,6 +770,8 @@ extension EditorMaskView {
         path.move(to: rightBottomStartPoint)
         path.addLine(to: rightBottomMidPoint)
         path.addLine(to: rightBottomEndPoint)
+
+        if usesLegacyCropStyle { return path }
         
         let centerLineWidth: CGFloat = 30
         let topCenterStartPoint = CGPoint(x: rect.midX - centerLineWidth * 0.5, y: rect.minY)

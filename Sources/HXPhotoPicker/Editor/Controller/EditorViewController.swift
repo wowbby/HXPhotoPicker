@@ -97,6 +97,11 @@ open class EditorViewController: HXBaseViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        if isLegacyCropLayout, #available(iOS 13.0, *) {
+            // Keep the black crop screen and its system controls in dark appearance.
+            // https://developer.apple.com/documentation/uikit/uiviewcontroller/overrideuserinterfacestyle
+            overrideUserInterfaceStyle = .dark
+        }
         imageFilterQueue = OperationQueue()
         imageFilterQueue.maxConcurrentOperationCount = 1
         
@@ -315,6 +320,9 @@ open class EditorViewController: HXBaseViewController {
         scaleSwitchView.addSubview(scaleSwitchRightBtn)
         
         editorView = EditorView()
+        if isLegacyCropLayout {
+            editorView.adjusterView.frameView.maskLinesView.usesLegacyCropStyle = true
+        }
         if #available(iOS 13.0, *) {
             backgroundView = UIScrollView()
             backgroundView.maximumZoomScale = 1
@@ -386,10 +394,10 @@ open class EditorViewController: HXBaseViewController {
             if self.isLegacyCropLayout {
                 let safeArea = self.view.safeAreaInsets
                 return .init(
-                    top: safeArea.top + 10,
-                    left: safeArea.left + 15,
-                    bottom: safeArea.bottom + 110,
-                    right: safeArea.right + 15
+                    top: UIDevice.isPortrait ? max(safeArea.top + 10, 60) : safeArea.top + 20,
+                    left: safeArea.left + 20,
+                    bottom: safeArea.bottom + 100,
+                    right: safeArea.right + 20
                 )
             }
             if UIDevice.isPortrait {

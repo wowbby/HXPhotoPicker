@@ -71,15 +71,24 @@ extension EditorViewController {
         leftRotateButton.titleLabel?.font = .systemFont(ofSize: 16)
         leftRotateButton.setTitle("旋转".localized, for: .normal)
         leftRotateButton.setTitleColor(.white, for: .normal)
+        // Reuse the basic editor's original 17 pt icons instead of the larger
+        // editor/SF Symbols assets, preserving the old image-to-title spacing.
+        resetButton.setImage(
+            UIImage.image(for: "hx_paizhao_bianji_huanyuan")?.withRenderingMode(.alwaysOriginal),
+            for: .normal
+        )
+        leftRotateButton.setImage(
+            UIImage.image(for: "hx_paizhao_bianji_xuanzhuan")?.withRenderingMode(.alwaysOriginal),
+            for: .normal
+        )
         leftRotateButton.titleEdgeInsets = .init(top: 0, left: 5, bottom: 0, right: 0)
         resetButton.titleEdgeInsets = .init(top: 0, left: 5, bottom: 0, right: 0)
-        if #available(iOS 13.0, *) {
-            resetButton.setImage(UIImage(systemName: "arrow.uturn.backward"), for: .normal)
-            resetButton.tintColor = .white
-        }
 
         let ratioButton = UIButton(type: .custom)
-        ratioButton.setImage(.imageResource.editor.tools.cropSize.image, for: .normal)
+        ratioButton.setImage(
+            UIImage.image(for: "hx_xiangce_xuanbili")?.withRenderingMode(.alwaysOriginal),
+            for: .normal
+        )
         ratioButton.accessibilityIdentifier = "hx.legacyCrop.ratio"
         ratioButton.accessibilityLabel = "比例".localized
         ratioButton.addTarget(self, action: #selector(didLegacyRatioButtonClick), for: .touchUpInside)
@@ -90,6 +99,8 @@ extension EditorViewController {
     }
 
     func layoutLegacyCropControls() {
+        // The original basic editor uses a 60 pt action row above a 40 pt
+        // bottom row. Anchor both rows above the actual device safe area.
         let insets = view.safeAreaInsets
         let left = insets.left + 20
         let right = view.width - insets.right - 20

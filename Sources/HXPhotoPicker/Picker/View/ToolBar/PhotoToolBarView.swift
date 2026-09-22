@@ -55,7 +55,10 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
             return selectedView.contentOffset
         }
         set {
-            guard let contentOffset = newValue else {
+            // Preview and grid toolbars can independently hide the selected strip.
+            // Both normal and interactive return transitions synchronize this offset.
+            guard isShowSelectedView, let selectedView = selectedView,
+                  let contentOffset = newValue else {
                 return
             }
             selectedView.contentOffset = contentOffset

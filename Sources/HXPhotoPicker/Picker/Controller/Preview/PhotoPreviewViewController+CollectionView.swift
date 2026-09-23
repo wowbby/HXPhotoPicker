@@ -32,6 +32,7 @@ extension PhotoPreviewViewController: UICollectionViewDataSource {
                     for: indexPath
                 ) as! PreviewLivePhotoViewCell
                 let livePhotoCell = cell as! PreviewLivePhotoViewCell
+                livePhotoCell.usesClassicAppearance = pickerConfig.usesClassicAppearance
                 livePhotoCell.livePhotoPlayType = config.livePhotoPlayType
                 livePhotoCell.liveMarkConfig = config.livePhotoMark
             }else {

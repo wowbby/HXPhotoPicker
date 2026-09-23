@@ -321,6 +321,7 @@ open class EditorViewController: HXBaseViewController {
         
         editorView = EditorView()
         if isLegacyCropLayout {
+            editorView.adjusterView.allowsImageGestures = false
             editorView.adjusterView.frameView.maskLinesView.usesLegacyCropStyle = true
         }
         if #available(iOS 13.0, *) {

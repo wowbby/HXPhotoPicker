@@ -20,6 +20,8 @@ class EditorAdjusterView: UIView {
     var contentInsets: UIEdgeInsets = .zero
     var setContentInsets: (() -> UIEdgeInsets)?
     var maximumZoomScale: CGFloat = 20
+    // The legacy basic crop editor adjusts the frame without dragging/zooming the image.
+    var allowsImageGestures: Bool = true
     var exportScale: CGFloat = UIScreen._scale {
         didSet {
             if #available(iOS 13.0, *), let canvasView = contentView.canvasView as? EditorCanvasView {
@@ -395,10 +397,12 @@ extension EditorAdjusterView {
         }
     }
     
-    func setScrollViewEnabled(_ isEnabled: Bool) {
+    func setScrollViewEnabled(_ enabled: Bool) {
+        let isEnabled = enabled && allowsImageGestures
         scrollView.alwaysBounceVertical = isEnabled
         scrollView.alwaysBounceHorizontal = isEnabled
         scrollView.isScrollEnabled = isEnabled
+        scrollView.panGestureRecognizer.isEnabled = isEnabled
         scrollView.pinchGestureRecognizer?.isEnabled = isEnabled
     }
     

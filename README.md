@@ -1,3 +1,6 @@
+> 本仓库是 `wowbby/HXPhotoPicker` 定制 fork，当前版本为 **5.0.6**，与上游官方版本区分维护。
+> 安装方式、可选兼容配置及已知限制见 [FORK_NOTES.md](FORK_NOTES.md)。下方保留上游文档。
+
 <h4 align="right">中文 | <strong><a href="https://github.com/SilenceLove/HXPhotoPicker/blob/master/Documentation/README_EN.md">English</a></strong></h4>
       
 <p align="center">

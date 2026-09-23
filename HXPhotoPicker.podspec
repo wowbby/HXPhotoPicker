@@ -1,15 +1,15 @@
 Pod::Spec.new do |spec|
     spec.name               = "HXPhotoPicker"
-    spec.version            = "5.0.5"
+    spec.version            = "5.0.6"
     spec.summary            = "照片/视频选择器 - 支持LivePhoto、GIF图片选择、自定义编辑照片/视频、3DTouch预览、浏览网络图片/网络视频 功能 - Imitation weibo photo/image picker - support for LivePhoto, GIF image selection, 3DTouch preview, browse the web image function"
-    spec.homepage           = "https://github.com/SilenceLove/HXPhotoPicker"
+    spec.homepage           = "https://github.com/wowbby/HXPhotoPicker"
     spec.license            = { :type => "MIT", :file => "LICENSE" }
     spec.author             = { "SilenceLove" => "294005139@qq.com" }
     
     spec.swift_versions     = ['5.0']
     spec.platform           = :ios, "10.0"
     spec.ios.deployment_target = "10.0"
-    spec.source             = { :git => "https://github.com/SilenceLove/HXPhotoPicker.git", :tag => "#{spec.version}" }
+    spec.source             = { :git => "https://github.com/wowbby/HXPhotoPicker.git", :tag => "#{spec.version}" }
 
     spec.framework          = 'UIKit','Photos','PhotosUI'
     spec.requires_arc       = true

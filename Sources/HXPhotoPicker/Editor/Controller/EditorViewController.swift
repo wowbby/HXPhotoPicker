@@ -69,6 +69,7 @@ open class EditorViewController: HXBaseViewController {
     var cancelButton: UIButton!
     var finishButton: UIButton!
     var resetButton: UIButton!
+    var legacyRatioButton: UIButton?
     var leftRotateButton: UIButton!
     var rightRotateButton: UIButton!
     var mirrorHorizontallyButton: UIButton!
@@ -96,6 +97,11 @@ open class EditorViewController: HXBaseViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        if isLegacyCropLayout, #available(iOS 13.0, *) {
+            // Keep the black crop screen and its system controls in dark appearance.
+            // https://developer.apple.com/documentation/uikit/uiviewcontroller/overrideuserinterfacestyle
+            overrideUserInterfaceStyle = .dark
+        }
         imageFilterQueue = OperationQueue()
         imageFilterQueue.maxConcurrentOperationCount = 1
         
@@ -314,6 +320,10 @@ open class EditorViewController: HXBaseViewController {
         scaleSwitchView.addSubview(scaleSwitchRightBtn)
         
         editorView = EditorView()
+        if isLegacyCropLayout {
+            editorView.adjusterView.allowsImageGestures = false
+            editorView.adjusterView.frameView.maskLinesView.usesLegacyCropStyle = true
+        }
         if #available(iOS 13.0, *) {
             backgroundView = UIScrollView()
             backgroundView.maximumZoomScale = 1
@@ -381,6 +391,15 @@ open class EditorViewController: HXBaseViewController {
         editorView.editContentInset = { [weak self] _ in
             guard let self = self else {
                 return .zero
+            }
+            if self.isLegacyCropLayout {
+                let safeArea = self.view.safeAreaInsets
+                return .init(
+                    top: UIDevice.isPortrait ? max(safeArea.top + 10, 60) : safeArea.top + 20,
+                    left: safeArea.left + 20,
+                    bottom: safeArea.bottom + 100,
+                    right: safeArea.right + 20
+                )
             }
             if UIDevice.isPortrait {
                 let top: CGFloat
@@ -503,6 +522,9 @@ open class EditorViewController: HXBaseViewController {
         view.addSubview(resetButton)
         view.addSubview(cancelButton)
         view.addSubview(finishButton)
+        if isLegacyCropLayout {
+            configureLegacyCropControls()
+        }
         
         if #available(iOS 13.0, *) {
             view.addSubview(drawUndoBtn)
@@ -783,6 +805,9 @@ open class EditorViewController: HXBaseViewController {
                 self.musicView.scrollToSelected()
             }
             orientationDidChange = false
+        }
+        if isLegacyCropLayout {
+            layoutLegacyCropControls()
         }
     }
     

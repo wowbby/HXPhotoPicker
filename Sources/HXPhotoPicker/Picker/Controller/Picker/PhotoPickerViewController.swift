@@ -196,6 +196,10 @@ public class PhotoPickerViewController: PhotoBaseViewController {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if pickerConfig.previewView.usesSystemNavigationTransition && config.previewStyle == .push {
+            // Fullscreen preview can hide the bar; native pop must restore the grid.
+            navigationController?.setNavigationBarHidden(false, animated: animated)
+        }
         if isShowToolbar {
             photoToolbar?.viewWillAppear(self)
         }
@@ -281,7 +285,7 @@ extension PhotoPickerViewController {
                     view.width += 10
                 }
                 view.isSelected = listView.filterOptions != .any
-                if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility {
+                if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                     var editorOptions: PickerAssetOptions = [.photo, .video]
                     #if HXPICKER_ENABLE_EDITOR
                     editorOptions = pickerConfig.editorOptions
@@ -304,7 +308,12 @@ extension PhotoPickerViewController {
                 }
             }
             if isLeft {
-                leftItems.append(.initCustomView(customView: view))
+                let item = UIBarButtonItem.initCustomView(customView: view)
+                if #available(iOS 26.0, *), pickerConfig.usesClassicAppearance,
+                   view.itemType == .cancel {
+                    item.identifier = "hx.picker.cancel"
+                }
+                leftItems.append(item)
             }else {
                 rightItems.append(.initCustomView(customView: view))
             }
@@ -320,6 +329,7 @@ extension PhotoPickerViewController {
         }
         navigationItem.leftBarButtonItems = leftItems
         navigationItem.rightBarButtonItems = rightItems
+
     }
     
     @objc 

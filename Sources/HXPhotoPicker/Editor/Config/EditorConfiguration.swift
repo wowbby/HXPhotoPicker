@@ -105,6 +105,14 @@ public struct EditorConfiguration: IndicatorTypeConfig, PhotoHUDConfig, ImageVie
     /// Fixed cropping state
     /// 固定裁剪状态
     public var isFixedCropSizeState: Bool = false
+
+    /// Use the basic crop controls from the Objective-C picker: reset, rotate,
+    /// and an aspect-ratio sheet above bottom cancel/finish controls.
+    /// Applies only to images in the fixed crop state; other editors are unchanged.
+    public var usesLegacyCropLayout: Bool = false
+
+    /// Optional finish title for the basic crop layout (for example, 选择 or 裁剪).
+    public var legacyCropFinishTitle: String?
     
     /// Ignore video cropping duration when fixed crop size state
     /// 固定裁剪大小状态时忽略视频裁剪时长

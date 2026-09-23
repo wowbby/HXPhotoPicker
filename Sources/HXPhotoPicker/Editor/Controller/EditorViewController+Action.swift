@@ -127,6 +127,17 @@ extension EditorViewController {
     
     @objc
     func didResetButtonClick(button: UIButton) {
+        if isLegacyCropLayout {
+            editorView.reset(true) { [weak self] in
+                self?.checkFinishButtonState()
+            }
+            lastScaleAngle = 0
+            rotateScaleView.reset()
+            ratioToolView.scrollToFree(animated: false)
+            button.isEnabled = false
+            checkFinishButtonState()
+            return
+        }
         rotateScaleView.stopScroll()
         if editorView.maskImage != nil {
             editorView.setMaskImage(nil, animated: true)
@@ -150,6 +161,17 @@ extension EditorViewController {
     
     @objc
     func didLeftRotateButtonClick(button: UIButton) {
+        if isLegacyCropLayout {
+            // The old crop editor releases the chosen ratio when rotating left.
+            editorView.isFixedRatio = false
+            ratioToolView.scrollToFree(animated: false)
+            editorView.rotateLeft(true) { [weak self] in
+                guard let self = self else { return }
+                self.resetButton.isEnabled = self.isReset
+                self.checkFinishButtonState()
+            }
+            return
+        }
         editorView.rotateLeft(true)
     }
     
@@ -178,6 +200,10 @@ extension EditorViewController {
     }
     
     func checkFinishButtonState() {
+        if isLegacyCropLayout {
+            finishButton.isEnabled = !config.isWhetherFinishButtonDisabledInUneditedState || isReset || isEdited
+            return
+        }
         if editorView.state == .edit {
             finishButton.isEnabled = true
         }else {

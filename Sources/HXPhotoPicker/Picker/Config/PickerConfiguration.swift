@@ -16,6 +16,10 @@ public struct PickerConfiguration: IndicatorTypeConfig, PhotoDebugLogsConfig, Ph
     /// 文本管理
     public var textManager: HX.TextManager { HX.TextManager.shared }
     
+    /// Use classic navigation and scroll-edge appearance without changing the host app.
+    /// Pair with AlbumTitleView and PhotoToolBarView for ordinary picker controls.
+    public var usesClassicAppearance: Bool = false
+
     /// 主题色
     public var themeColor: UIColor = .systemBlue { didSet { setThemeColor(themeColor) } }
     

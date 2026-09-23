@@ -29,7 +29,7 @@ public class PhotoPickerFilterItemView: UIView, PhotoNavigationItem {
         button = UIButton(type: .custom)
         button.setImage(.imageResource.picker.photoList.filterNormal.image?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.setImage(.imageResource.picker.photoList.filterSelected.image?.withRenderingMode(.alwaysTemplate), for: .selected)
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility {
+        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !config.usesClassicAppearance {
             button.configuration = config.photoList.filterButtonConfig
         }else {
             button.addTarget(self, action: #selector(didFilterClick), for: .touchUpInside)
@@ -57,7 +57,7 @@ public class PhotoPickerFilterItemView: UIView, PhotoNavigationItem {
     var filterDada: PhotoNavigationFilterData?
     var handler: ((PhotoPickerFilterSection.Options) -> Void)?
     public func makeFilterData(_ data: PhotoNavigationFilterData, handler: @escaping (PhotoPickerFilterSection.Options) -> Void) {
-        if #available(iOS 26.0, *) {
+        if #available(iOS 26.0, *), !config.usesClassicAppearance {
             filterDada = data
             self.handler = handler
             button.menu = makeMenu()

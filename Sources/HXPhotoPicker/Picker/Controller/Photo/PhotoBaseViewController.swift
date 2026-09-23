@@ -16,6 +16,8 @@ public class PhotoBaseViewController: HXBaseViewController, PhotoPickerControlle
         super.init(nibName: nil, bundle: nil)
     }
     
+    override var allowsGlassContainers: Bool { !pickerConfig.usesClassicAppearance }
+
     weak var weakController: PhotoPickerController?
     
     public override func viewDidLoad() {

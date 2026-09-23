@@ -40,6 +40,10 @@ public class PhotoPreviewViewController: PhotoBaseViewController {
     var firstLayoutSubviews: Bool = true
     var requestPreviewTimer: Timer?
     var isShowToolbar: Bool = false
+    private var hasPendingEmptyAssetUpdate: Bool = false
+    var usesSystemNavigationTransition: Bool {
+        config.usesSystemNavigationTransition && previewType == .none
+    }
     var assetCount: Int {
         if previewAssets.isEmpty {
             if let pages = numberOfPages?() {
@@ -142,6 +146,9 @@ public class PhotoPreviewViewController: PhotoBaseViewController {
     }
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if usesSystemNavigationTransition {
+            navigationController?.setNavigationBarHidden(statusBarShouldBeHidden, animated: animated)
+        }
         if isShowToolbar {
             photoToolbar.viewWillAppear(self)
         }
@@ -157,7 +164,7 @@ public class PhotoPreviewViewController: PhotoBaseViewController {
         }else {
             isMacApp = false
         }
-        if ((isFullscreen && interactiveTransition == nil) ||
+        if !usesSystemNavigationTransition && ((isFullscreen && interactiveTransition == nil) ||
             (!UIDevice.isPortrait && !UIDevice.isPad) || isMacApp) && previewType != .browser {
             interactiveTransition = PickerInteractiveTransition(
                 panGestureRecognizerFor: self,
@@ -166,6 +173,14 @@ public class PhotoPreviewViewController: PhotoBaseViewController {
         }
         if isShowToolbar {
             photoToolbar.viewDidAppear(self)
+        }
+        if hasPendingEmptyAssetUpdate {
+            hasPendingEmptyAssetUpdate = false
+            // Wait until the initial push completes before closing an empty preview.
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.assetCount == 0 else { return }
+                self.updateAsstes(for: [])
+            }
         }
     }
     
@@ -280,7 +295,8 @@ extension PhotoPreviewViewController {
         
         selectBoxItem = .init(customView: selectBoxControl)
         
-        if previewType != .none && pickerController.modalPresentationStyle != .custom {
+        if usesSystemNavigationTransition ||
+            (previewType != .none && pickerController.modalPresentationStyle != .custom) {
             updateColors()
         }
         if pickerConfig.isMultipleSelect || previewType != .browser {
@@ -681,8 +697,16 @@ extension PhotoPreviewViewController {
     
     func updateAsstes(for assets: [PhotoAsset]) {
         previewAssets = assets
-        collectionView.reloadData()
         let count = assetCount
+        // A fetch can finish after this controller is pushed but before initView().
+        // The first layout will consume the latest assets and a valid page index.
+        guard collectionView != nil else {
+            currentPreviewIndex = max(0, min(currentPreviewIndex, count - 1))
+            hasPendingEmptyAssetUpdate = count == 0
+            return
+        }
+        hasPendingEmptyAssetUpdate = false
+        collectionView.reloadData()
         if count > 0 {
             var page = currentPreviewIndex
             if page > count - 1 {
@@ -703,7 +727,8 @@ extension PhotoPreviewViewController {
         }else {
             if let viewControllers = navigationController?.viewControllers,
                viewControllers.count > 1 {
-                navigationController?.popViewController(animated: true)
+                // The zoom animator needs a current asset to complete its transition.
+                navigationController?.popViewController(animated: usesSystemNavigationTransition)
             }else {
                 dismiss(animated: true, completion: nil)
             }

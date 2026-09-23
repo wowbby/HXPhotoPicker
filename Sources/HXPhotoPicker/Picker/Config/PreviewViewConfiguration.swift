@@ -10,6 +10,10 @@ import UIKit
 
 // MARK: Preview interface configuration class / 预览界面配置类
 public struct PreviewViewConfiguration {
+
+    /// Use UIKit page push/pop instead of zooming from/to a grid thumbnail.
+    /// Applies to previews pushed from the picker; modal browsers are unchanged.
+    public var usesSystemNavigationTransition: Bool = false
     
     /// 自定义视频Cell
     public var customVideoCellClass: PreviewVideoViewCell.Type? = PreviewVideoControlViewCell.self

@@ -16,6 +16,9 @@ extension PhotoPreviewViewController: UINavigationControllerDelegate {
         from fromVC: UIViewController,
         to toVC: UIViewController
     ) -> UIViewControllerAnimatedTransitioning? {
+        // Returning nil uses UIKit's page transition and edge-swipe navigation.
+        // Keep the preview content intact when returning without the zoom animator.
+        guard !usesSystemNavigationTransition else { return nil }
         if operation == .push {
             if toVC is PhotoPreviewViewController && fromVC is PhotoPickerViewController {
                 return PickerTransition.init(type: .push)

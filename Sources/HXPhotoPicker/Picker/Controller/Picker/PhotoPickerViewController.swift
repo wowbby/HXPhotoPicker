@@ -196,6 +196,10 @@ public class PhotoPickerViewController: PhotoBaseViewController {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if pickerConfig.previewView.usesSystemNavigationTransition && config.previewStyle == .push {
+            // Fullscreen preview can hide the bar; native pop must restore the grid.
+            navigationController?.setNavigationBarHidden(false, animated: animated)
+        }
         if isShowToolbar {
             photoToolbar?.viewWillAppear(self)
         }

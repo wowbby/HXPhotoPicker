@@ -534,7 +534,21 @@ extension PhotoPickerController {
         if modalPresentationStyle != .custom {
             setupBackgroundColor()
         }
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility {
+        if config.usesClassicAppearance, #available(iOS 13.0, *) {
+            let isDark = PhotoManager.isDark
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = isDark ? config.navigationViewBackgroudDarkColor : config.navigationViewBackgroundColor
+            appearance.titleTextAttributes = [.foregroundColor: isDark ? config.navigationTitleDarkColor : config.navigationTitleColor]
+            appearance.shadowColor = .clear
+            navigationBar.tintColor = isDark ? config.navigationDarkTintColor : config.navigationTintColor
+            navigationBar.standardAppearance = appearance
+            navigationBar.scrollEdgeAppearance = appearance
+            navigationBar.compactAppearance = appearance
+            if #available(iOS 15.0, *) {
+                navigationBar.compactScrollEdgeAppearance = appearance
+            }
+        }else if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility {
         }else {
             let isDark = PhotoManager.isDark
             let titleTextAttributes: [NSAttributedString.Key : Any] = [

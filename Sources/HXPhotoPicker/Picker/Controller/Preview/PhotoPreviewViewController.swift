@@ -294,6 +294,21 @@ extension PhotoPreviewViewController {
         selectBoxControl.addTarget(self, action: #selector(didSelectBoxControlClick), for: UIControl.Event.touchUpInside)
         
         selectBoxItem = .init(customView: selectBoxControl)
+        if pickerConfig.usesClassicAppearance {
+            selectBoxItem = selectBoxItem.hidesShared()
+            if #available(iOS 26.0, *), previewType == .none {
+                // A custom item avoids UIKit's glass Back-to-Cancel morph.
+                let back = UIBarButtonItem(
+                    image: HX.imageResource.picker.preview.back.image,
+                    style: .plain,
+                    target: self,
+                    action: #selector(didClassicBackClick)
+                ).hidesShared()
+                back.identifier = "hx.picker.preview.back"
+                navigationItem.leftBarButtonItem = back
+            }
+        }
+
         
         if usesSystemNavigationTransition ||
             (previewType != .none && pickerController.modalPresentationStyle != .custom) {
@@ -326,7 +341,7 @@ extension PhotoPreviewViewController {
                         target: self,
                         action: #selector(didCancelItemClick)
                     )
-                    if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+                    if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                         cancelItem = item
                     }else {
                         cancelItem = item.hidesShared()
@@ -338,7 +353,7 @@ extension PhotoPreviewViewController {
                         target: self,
                         action: #selector(didCancelItemClick)
                     )
-                    if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+                    if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                         cancelItem = item
                     }else {
                         cancelItem = item.hidesShared()
@@ -647,6 +662,16 @@ extension PhotoPreviewViewController {
         startRequestPreviewTimer()
     }
     
+    @objc
+    private func didClassicBackClick() {
+        guard let navigationController = navigationController,
+              navigationController.topViewController === self,
+              navigationController.viewControllers.count > 1,
+              !navigationController.isBeingDismissed,
+              navigationController.transitionCoordinator == nil else { return }
+        navigationController.popViewController(animated: true)
+    }
+
     @objc func didCancelItemClick() {
         pickerController.cancelCallback()
     }

@@ -27,9 +27,16 @@ open class HXBaseViewController: UIViewController {
         )
     }
     
+    var allowsGlassContainers: Bool { true }
+
     var topContainerView: UIView!
     func initTopContainerView(_ scrollView: UIScrollView) {
         #if canImport(UIKit.UIGlassEffect)
+        if #available(iOS 26.0, *), !allowsGlassContainers {
+            scrollView.topEdgeEffect.isHidden = true
+            scrollView.bottomEdgeEffect.isHidden = true
+            return
+        }
         if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
             scrollView.topEdgeEffect.isHidden = false
             topContainerView = UIView()
@@ -56,6 +63,11 @@ open class HXBaseViewController: UIViewController {
     var bottomContainerView: UIView!
     func initBottomContainerView(_ scrollView: UIScrollView) {
         #if canImport(UIKit.UIGlassEffect)
+        if #available(iOS 26.0, *), !allowsGlassContainers {
+            scrollView.topEdgeEffect.isHidden = true
+            scrollView.bottomEdgeEffect.isHidden = true
+            return
+        }
         if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
             scrollView.bottomEdgeEffect.isHidden = false
             bottomContainerView = UIView()

@@ -15,7 +15,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
     public var contentInset: UIEdgeInsets = .zero {
         didSet {
             let contentTop: CGFloat
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 segmentedBgView.y = contentInset.top + 5
                 contentTop = segmentedBgView.frame.maxY + 15
             }else {
@@ -50,7 +50,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
             if contentVCs.isEmpty {
                 return .any
             }
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 return contentVCs[segmentedControl.selectedSegmentIndex].filterOptions
             }else {
                 return contentVCs[headerView.selectedIndex].filterOptions
@@ -106,7 +106,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
                 vc.assetResult = assetResult
                 contentVCs.insert(vc, at: 0)
             }
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 segmentedControl = .init(items: titles)
                 segmentedControl.selectedSegmentIndex = 0
                 for (index, _) in titles.enumerated() {
@@ -139,7 +139,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
             if contentVCs.isEmpty {
                 return []
             }
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 return contentVCs[segmentedControl.selectedSegmentIndex].assets
             }else {
                 return contentVCs[headerView.selectedIndex].assets
@@ -153,7 +153,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
             if contentVCs.isEmpty {
                 return 0
             }
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 return contentVCs[segmentedControl.selectedSegmentIndex].photoCount
             }else {
                 return contentVCs[headerView.selectedIndex].photoCount
@@ -167,7 +167,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
             if contentVCs.isEmpty {
                 return 0
             }
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 return contentVCs[segmentedControl.selectedSegmentIndex].videoCount
             }else {
                 return contentVCs[headerView.selectedIndex].videoCount
@@ -208,7 +208,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
         }
         view.addSubview(scrollView)
         
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
             segmentedBgView = UIToolbar()
             view.addSubview(segmentedBgView)
         }else {
@@ -247,7 +247,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
         if contentVCs.isEmpty {
             return nil
         }
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
             return contentVCs[segmentedControl.selectedSegmentIndex].getCell(for: asset)
         }else {
             return contentVCs[headerView.selectedIndex].getCell(for: asset)
@@ -270,7 +270,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
     
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
             segmentedBgView.frame = .init(x: 0, y: contentInset.top + 5, width: view.width, height: 40)
         }else {
             headerView.frame = .init(x: 0, y: contentInset.top, width: view.width, height: 40)
@@ -278,7 +278,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
         scrollView.frame = view.bounds
         layoutViews()
         if isDeviceOrientation {
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 
             }else {
                 headerView(headerView, didSelectedButton: headerView.selectedIndex)
@@ -295,7 +295,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
         for (index, controller) in contentVCs.enumerated() {
             controller.view.frame = .init(x: view.width * CGFloat(index), y: 0, width: view.width, height: view.height)
             let contentTop: CGFloat
-            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+            if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
                 contentTop = segmentedBgView.frame.maxY + 15
             }else {
                 contentTop = headerView.frame.maxY
@@ -311,7 +311,7 @@ public class PhotoPickerPageViewController: HXBaseViewController, PhotoPickerLis
 
 extension PhotoPickerPageViewController: UIScrollViewDelegate, PhotoPickerPageHeaderViewDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
         }else {
             let offsetX = scrollView.contentOffset.x
             let value = offsetX / (scrollView.contentSize.width - scrollView.width)
@@ -322,7 +322,7 @@ extension PhotoPickerPageViewController: UIScrollViewDelegate, PhotoPickerPageHe
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let offsetX = scrollView.contentOffset.x
         let index = Int(offsetX / scrollView.width)
-        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility  {
+        if #available(iOS 26.0, *), !PhotoManager.isIos26Compatibility, !pickerConfig.usesClassicAppearance {
             segmentedControl.selectedSegmentIndex = Int(index)
         }else {
             headerView.selectedIndex = Int(index)

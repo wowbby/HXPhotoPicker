@@ -26,12 +26,22 @@ public final class SelectBoxView: UIControl {
             }
         }
     }
+    // The original-quality switch keeps its outlined diameter in both states.
+    var usesFixedSelectionOutline = false
+
     public override var isSelected: Bool {
         didSet {
+            if usesFixedSelectionOutline {
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+            }
             if !isSelected {
                 text = "0"
             }
             updateLayers()
+            if usesFixedSelectionOutline {
+                CATransaction.commit()
+            }
         }
     }
     public override var isHighlighted: Bool {
@@ -124,7 +134,12 @@ public final class SelectBoxView: UIControl {
                 selectedBackgroudDarkColor.cgColor :
                 selectedBackgroundColor.cgColor
             }
-            backgroundLayer.lineWidth = 0
+            if usesFixedSelectionOutline {
+                backgroundLayer.lineWidth = config.borderWidth
+                backgroundLayer.strokeColor = backgroundLayer.fillColor
+            }else {
+                backgroundLayer.lineWidth = 0
+            }
         }else {
             backgroundLayer.lineWidth = config.borderWidth
             let backgroundColor = config.backgroundColor

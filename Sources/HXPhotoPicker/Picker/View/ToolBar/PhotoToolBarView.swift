@@ -12,6 +12,14 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
     
     public weak var toolbarDelegate: PhotoToolBarDelegate?
     
+    private var showsSizeBelowOriginal: Bool {
+        type == .picker && pickerConfig.selectMode == .multiple &&
+            pickerConfig.photoList.bottomView.isShowOriginalFileSize &&
+            !pickerConfig.photoList.bottomView.isHiddenOriginalButton
+    }
+
+    private var actionRowHeight: CGFloat { showsSizeBelowOriginal ? 56 : 50 }
+
     public var toolbarHeight: CGFloat {
         if type == .browser {
             return 70 + UIDevice.bottomMargin
@@ -19,7 +27,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
         if pickerConfig.selectMode == .single, isShowPrompt {
             return 0
         }
-        return 50 + UIDevice.bottomMargin
+        return actionRowHeight + UIDevice.bottomMargin
     }
     
     public var viewHeight: CGFloat {
@@ -83,6 +91,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
     private var originalView: UIControl!
     private var originalBox: SelectBoxView!
     private var originalTitleLb: UILabel!
+    private var originalSizeLabel: UILabel?
     private var originalLoadingView: UIActivityIndicatorView!
     private var finishBtn: UIButton!
     private var isOriginalLoading: Bool = false
@@ -130,7 +139,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
         backgroundView = UIVisualEffectView()
         addSubview(backgroundView)
         
-        contentView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: 50 + UIDevice.bottomMargin))
+        contentView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: actionRowHeight + UIDevice.bottomMargin))
         
         let viewConfig: PickerBottomViewConfiguration
         if type == .picker {
@@ -150,7 +159,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
             previewBtn.titleLabel?.font = .textPhotoList.bottomView.previewTitleFont
             previewBtn.isEnabled = false
             previewBtn.addTarget(self, action: #selector(didPreviewButtonClick), for: .touchUpInside)
-            previewBtn.height = 50
+            previewBtn.height = actionRowHeight
             previewBtn.isHidden = viewConfig.isHiddenPreviewButton
             let previewWidth: CGFloat = previewBtn.currentTitle!.localized.width(
                 ofFont: previewBtn.titleLabel!.font,
@@ -213,6 +222,15 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
             }
             originalTitleLb.lineBreakMode = .byTruncatingHead
             originalView.addSubview(originalTitleLb)
+            if showsSizeBelowOriginal {
+                let sizeLabel = UILabel()
+                sizeLabel.font = .systemFont(ofSize: 12)
+                sizeLabel.textAlignment = .center
+                sizeLabel.adjustsFontSizeToFitWidth = true
+                sizeLabel.minimumScaleFactor = 0.8
+                originalView.addSubview(sizeLabel)
+                originalSizeLabel = sizeLabel
+            }
             
             let boxConfig: SelectBoxConfiguration
             if type == .picker {
@@ -221,6 +239,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
                 boxConfig = config.previewView.bottomView.originalSelectBox
             }
             originalBox = SelectBoxView(boxConfig, frame: CGRect(x: 0, y: 0, width: 17, height: 17))
+            originalBox.usesFixedSelectionOutline = showsSizeBelowOriginal
             originalBox.backgroundColor = .clear
             originalBox.isUserInteractionEnabled = false
             originalView.addSubview(originalBox)
@@ -231,7 +250,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
             
             originalView.addTarget(self, action: #selector(didOriginalButtonClick), for: .touchUpInside)
             originalobserve = originalView.observe(\.isHighlighted, options: [.new, .old]) { [weak self] control, value in
-                guard let self = self else { return }
+                guard let self = self, !self.showsSizeBelowOriginal else { return }
                 self.originalBox.isHighlighted = control.isHighlighted
                 let config = self.type == .picker ? self.pickerConfig.photoList.bottomView : self.pickerConfig.previewView.bottomView
                 let textColor = PhotoManager.isDark ? config.originalButtonTitleDarkColor : config.originalButtonTitleColor
@@ -288,6 +307,9 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
     }
     public func updateOriginalState(_ isSelected: Bool) {
         originalBox.isSelected = isSelected
+        if originalSizeLabel != nil && !isSelected {
+            stopOriginalLoading(bytes: 0, bytesString: "")
+        }
     }
     
     public func requestOriginalAssetBtyes() {
@@ -319,6 +341,9 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
     public func selectedAssetDidChanged(_ photoAssets: [PhotoAsset]) {
         if type == .browser { return }
         updateFinishButtonTitle(photoAssets)
+        if originalSizeLabel != nil && photoAssets.isEmpty {
+            stopOriginalLoading(bytes: 0, bytesString: "")
+        }
     }
     
     public func insertSelectedAsset(_ photoAsset: PhotoAsset) {
@@ -385,11 +410,13 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
     @objc
     private func didOriginalButtonClick() {
         originalBox.isSelected = !originalBox.isSelected
-        originalBox.layer.removeAnimation(forKey: "SelectControlAnimation")
-        let keyAnimation = CAKeyframeAnimation.init(keyPath: "transform.scale")
-        keyAnimation.duration = 0.3
-        keyAnimation.values = [1.2, 0.8, 1.1, 0.9, 1.0]
-        originalBox.layer.add(keyAnimation, forKey: "SelectControlAnimation")
+        if originalSizeLabel == nil {
+            originalBox.layer.removeAnimation(forKey: "SelectControlAnimation")
+            let keyAnimation = CAKeyframeAnimation.init(keyPath: "transform.scale")
+            keyAnimation.duration = 0.3
+            keyAnimation.values = [1.2, 0.8, 1.1, 0.9, 1.0]
+            originalBox.layer.add(keyAnimation, forKey: "SelectControlAnimation")
+        }
         
         let isSelected = originalBox.isSelected
         if isSelected {
@@ -404,18 +431,26 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
     
     private func startOriginalLoading() {
         isOriginalLoading = true
+        originalLoadingView.startAnimating()
+        if let sizeLabel = originalSizeLabel {
+            sizeLabel.text = nil
+            return
+        }
         if type == .picker {
             originalTitleLb.text = .textPhotoList.bottomView.originalTitle.text
         }else {
             originalTitleLb.text = .textPreview.bottomView.originalTitle.text
         }
-        originalLoadingView.startAnimating()
         updateOriginalViewFrame()
     }
     
     private func stopOriginalLoading(bytes: Int, bytesString: String) {
         isOriginalLoading = false
         originalLoadingView.stopAnimating()
+        if let sizeLabel = originalSizeLabel {
+            sizeLabel.text = bytes > 0 ? originalSizeText(bytesString) : nil
+            return
+        }
         let originalTitle: String
         if type == .picker {
             originalTitle = .textPhotoList.bottomView.originalTitle.text
@@ -453,7 +488,7 @@ public class PhotoToolBarView: UIView, PhotoToolBar {
         super.layoutSubviews()
         backgroundView.frame = bounds
         contentView.width = width
-        contentView.height = 50 + UIDevice.bottomMargin
+        contentView.height = actionRowHeight + UIDevice.bottomMargin
         let leftMargin = self.leftMargin
         if type == .picker {
             if isShowPrompt {
@@ -758,6 +793,7 @@ extension PhotoToolBarView {
         }
         
         if type != .browser {
+            originalSizeLabel?.textColor = UIColor(white: isDark ? 0.70 : 0.43, alpha: 1)
             originalLoadingView.style = isDark ? config.originalLoadingDarkStyle : config.originalLoadingStyle
             originalTitleLb.textColor = isDark ? config.originalButtonTitleDarkColor : config.originalButtonTitleColor
             
@@ -807,6 +843,10 @@ extension PhotoToolBarView {
 extension PhotoToolBarView {
     
     func updateOriginalViewFrame() {
+        if let sizeLabel = originalSizeLabel {
+            layoutOriginalWithSize(sizeLabel)
+            return
+        }
         updateOriginalSubviewFrame()
         if isOriginalLoading {
             originalView.frame = CGRect(x: 0, y: 0, width: originalLoadingView.frame.maxX, height: 50)
@@ -835,6 +875,39 @@ extension PhotoToolBarView {
             }
         }
     }
+    private func originalSizeText(_ bytesString: String) -> String {
+        let manager = PhotoManager.shared
+        let language = manager.languageBundle?.bundleURL.deletingPathExtension().lastPathComponent ?? manager.languageStr
+        return language.hasPrefix("zh") ? "共" + bytesString.replacingOccurrences(of: " ", with: "") : bytesString
+    }
+
+    // Preview, Original and Done share the action row. The size uses the space below it.
+    private func layoutOriginalWithSize(_ sizeLabel: UILabel) {
+        let previewEnd = previewBtn.isHidden ? 0 : previewBtn.hxPicker_maxX
+        let sideInset = max(previewEnd, width - finishBtn.hxPicker_x) + 4
+        let availableWidth = max(0, width - 2 * sideInset)
+        let titleWidth = ceil(originalTitleLb.intrinsicContentSize.width)
+        let spacing: CGFloat = 5
+        let headerWidth = originalBox.width + spacing + titleWidth
+        let controlWidth = min(availableWidth, max(96, headerWidth))
+        originalView.frame = CGRect(x: (width - controlWidth) / 2, y: 0, width: controlWidth, height: actionRowHeight)
+
+        let headerX = max(0, (controlWidth - headerWidth) / 2)
+        originalBox.hxPicker_x = headerX
+        originalBox.centerY = previewBtn.frame.midY
+        let titleX = headerX + originalBox.width + spacing
+        previewBtn.layoutIfNeeded()
+        let previewTextFrame = previewBtn.titleRect(forContentRect: previewBtn.contentRect(forBounds: previewBtn.bounds))
+        originalTitleLb.hxPicker_frame = CGRect(
+            x: titleX, y: previewTextFrame.minY,
+            width: min(titleWidth, max(0, controlWidth - titleX)), height: previewTextFrame.height
+        )
+        let detailHeight = ceil(sizeLabel.font.lineHeight)
+        sizeLabel.frame = CGRect(x: 0, y: originalTitleLb.frame.maxY, width: controlWidth, height: detailHeight)
+        originalLoadingView.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
+        originalLoadingView.center = CGPoint(x: controlWidth / 2, y: sizeLabel.frame.midY)
+    }
+
     private func updateOriginalSubviewFrame() {
         originalTitleLb.frame = CGRect(
             x: originalBox.frame.maxX + 5,
@@ -915,7 +988,7 @@ extension PhotoToolBarView {
         }else {
             finishBtn.hxPicker_x = width - finishWidth - 12
         }
-        finishBtn.centerY = 25
+        finishBtn.centerY = type == .picker ? previewBtn.frame.midY : 25
     }
 }
 

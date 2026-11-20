@@ -1,16 +1,20 @@
-# wowbby fork 5.0.6
+# wowbby fork 5.0.7
 
-This release combines the fork's existing master (`ca5f420`) with the compatibility changes based on upstream 5.0.5. It preserves the upstream history, copyright notices, and MIT license. The version identifies this fork; it is not a release published by SilenceLove.
+Version 5.0.6 combined the fork's existing master (`ca5f420`) with the compatibility changes based on upstream 5.0.5. It preserves the upstream history, copyright notices, and MIT license. The version identifies this fork; it is not a release published by SilenceLove.
 
 ## Install
 
 Use an explicit Git source so CocoaPods resolves this fork:
 
 ```ruby
-pod 'HXPhotoPicker', :git => 'https://github.com/wowbby/HXPhotoPicker.git', :tag => '5.0.6'
+pod 'HXPhotoPicker', :git => 'https://github.com/wowbby/HXPhotoPicker.git', :tag => '5.0.7'
 ```
 
-For Swift Package Manager, use `https://github.com/wowbby/HXPhotoPicker.git` with the exact version `5.0.6`. Publishing the Git tag does not publish a spec to CocoaPods Trunk.
+For Swift Package Manager, use `https://github.com/wowbby/HXPhotoPicker.git` with the exact version `5.0.7`. Publishing the Git tag does not publish a spec to CocoaPods Trunk.
+
+## Original photo control in 5.0.7
+
+In the classic multi-selection photo grid, the Original control shares a row with Preview and Done. When file-size display is enabled, a second line shows the total. Toggling Original or updating the size keeps the first row and checkbox outline in place.
 
 ## Compatibility additions
 
@@ -25,7 +29,7 @@ The retained upstream image-loading optimization downsamples large images before
 
 ## Release validation
 
-Validated on 2026-09-23 with CocoaPods and an iPhone 17 Pro simulator running iOS 26.4. The Objective-C/Swift integration harness passed all 31 XCTest cases, including legacy crop controls, picker navigation/cancellation, Live Photo appearance reuse, and a 6000 x 4000 JPEG loaded and exported as a square crop. The large-image check reads the exported file rather than the thumbnail returned in `ImageEditedResult.image`. Podspec parsing and Swift Package manifest parsing also passed. Physical-device acceptance remains separate.
+Version 5.0.6 was validated on 2026-09-23 with CocoaPods and an iPhone 17 Pro simulator running iOS 26.4. The Objective-C/Swift integration harness passed all 31 XCTest cases, including legacy crop controls, picker navigation/cancellation, Live Photo appearance reuse, and a 6000 x 4000 JPEG loaded and exported as a square crop. The large-image check reads the exported file rather than the thumbnail returned in `ImageEditedResult.image`. Podspec parsing and Swift Package manifest parsing also passed. Physical-device acceptance remains separate.
 
 ## Known limitations
 
